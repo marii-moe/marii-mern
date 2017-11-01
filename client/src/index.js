@@ -1,7 +1,7 @@
 import _ from 'lodash';
 function component() {
   var element = document.createElement('div');
-  element.innerHTML = 'Hello World';  
+  element.innerHTML = _.join(['Hello', 'webpack'], ' ');  
   return element;
 }
 document.body.appendChild(component());
