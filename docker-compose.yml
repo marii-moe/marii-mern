@@ -1,6 +1,10 @@
-version: "2"
+version: "3.4"
 services:
-  client:
-    build: client/
+  webpack-client:
+    build:
+      context: client/
+      target: webpack
     ports:
       - "3000:3000"
+    volumes:
+      - ./client/src:/var/www/marii-mern/src/
