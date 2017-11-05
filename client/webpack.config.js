@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports= {
-  entry: './src/index.js',
+  entry: './src/index.jsx',
   devServer: {
     contentBase: path.join(__dirname, "dist"),
     compress: true,
@@ -15,14 +15,24 @@ module.exports= {
   module: {
     rules: [
       {
-	test: /\.js$/,
+	test: /\.jsx?$/,
 	exclude: /(node_modules)/,
 	use: {
 	  loader: 'babel-loader',
 	  options: {
-	    presets: ['env']
+	    presets: ['env','react']
 	  }
 	}
+      },
+      {
+	test: /\.scss$/,
+        use: [{
+          loader: "style-loader"
+        }, {
+          loader: "css-loader"
+        }, {
+          loader: "sass-loader"
+        }]
       }
     ]
   }
