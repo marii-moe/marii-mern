@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
-import { GC_USER_ID } from '../constants'
+import { GC_USER_ID, LINKS_PER_PAGE } from '../constants'
 import { ALL_LINKS_QUERY } from './LinkList'
 
 class CreateLink extends Component {
@@ -39,7 +39,7 @@ class CreateLink extends Component {
   _createLink = async () => {
     const postedById = localStorage.getItem(GC_USER_ID)
     if(!postedById) {
-      console.error()
+      console.error('No user logged in')
       return
     }
     const { description, url } = this.state
@@ -49,15 +49,22 @@ class CreateLink extends Component {
 	url,
       },
       update: (store, { data: { createLink } }) => {
-	const data = store.readQuery({ query: ALL_LINKS_QUERY })
+	const first = LINKS_PER_PAGE
+	const skip = 0
+	const data = store.readQuery({
+	  query: ALL_LINKS_QUERY,
+	  variables: { first, skip}
+	})
 	data.allLinks.splice(0,0,createLink)
+	data.allLinks.pop()
 	store.writeQuery({
 	  query: ALL_LINKS_QUERY,
 	  data,
+	  variables: { first, skip, }
 	})
       },
     })
-    this.props.history.push(`/`)
+    this.props.history.push(`/new/1`)
   }
 }
 
