@@ -9,6 +9,7 @@ const {graphqlExpress, graphiqlExpress} = require('apollo-server-express');
 const {authenticate} = require('./src/authentication')
 const schema = require('./src/schema');
 
+
 const connectMongo = require('./src/mongo-connector');
 
 const start = async () => {
@@ -27,8 +28,28 @@ const start = async () => {
       schema,
     }
   }
+
+  const subscriptionBuildOptions = async (connectionParams,webSocket) => {
+     return {
+       dataloaders: buildDataloaders(mongo),
+       mongo,
+     }
+  }
+
   const IQL_PORT = 3001;
-  
+
+  app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type,Authorization, Accept");
+    next();
+  });
+  app.use("/graphql", function (req, res, next) {
+    if (req.method === 'OPTIONS') {
+      res.sendStatus(200);
+    } else {
+      next();
+    }
+  });
   app.use('/graphql', bodyParser.json(), graphqlExpress(buildOptions))
   app.use('/graphiql', graphiqlExpress({
     endpointURL: '/graphql',
@@ -41,7 +62,7 @@ const start = async () => {
   const server = createServer(app);
   server.listen(PORT, () => {
     SubscriptionServer.create(
-      {execute, subscribe, schema},
+      {execute, subscribe, schema, onConnect: subscriptionBuildOptions},
       {server, path: '/subscriptions'},
     );
     console.log(`Hackernews GraphQL server running on port ${PORT}.`)

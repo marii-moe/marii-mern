@@ -4,7 +4,7 @@ WORKDIR /var/www/marii-mern/
 RUN npm install
 COPY . .
 RUN npm run-script build
-CMD ["npm","run-script","start:dev"]
+CMD ["npm","start"]
 
 FROM nginx:1.13-alpine as nginx
-COPY --from=webpack /var/www/marii-mern/dist /usr/share/nginx/html
+COPY --from=webpack /var/www/marii-mern/build /usr/share/nginx/html

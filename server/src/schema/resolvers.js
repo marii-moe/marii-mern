@@ -63,7 +63,8 @@ module.exports = {
 	password: data.authProvider.email.password,
       };
       const response = await Users.insert(newUser);
-      return Object.assign({id: response.insertedIds[0]}, newUser);
+      let user = Object.assign({id: response.insertedIds[0]}, newUser)
+      return {token: `token-${user.email}`,user};
     },		     
     signinUser: async (root, data, {mongo: {Users}}) => {
       const user = await Users.findOne({email: data.email.email})
@@ -76,25 +77,31 @@ module.exports = {
 	linkId: new ObjectID(data.linkId),
       };
       const response = await Votes.insert(newVote);
-      return Object.assign({id: response.insertedIds[0]}, newVote);
+      newVote.id = response.insertedIds[0]
+      pubsub.publish('Vote', {Vote: {mutation: 'CREATED', node: newVote }});
+      return newVote
     },
   },
   Subscription: {
     Link: {
       subscribe: () => pubsub.asyncIterator('Link'),
     },
+    Vote: {
+      subscribe: () => pubsub.asyncIterator('Vote'),
+    },
   },
   Link: {
     id: root => root._id || root.id,
 
-    postedBy: async ({postedById}, data, {dataloaders: {userLoader}}) => {
+    postedBy: async ({postedById}, data, context) => {
+      const userLoader=context.dataloaders.userLoader
       return await userLoader.load(postedById);
     },
 
     votes: async ({_id}, data, {mongo: {Votes}}) => {
       return await Votes.find({linkId: _id}).toArray();
     },
-  },
+   },
   User: {
     id: root => root._id || root.id,
     votes: async ({_id}, data, {mongo: {Votes}}) => {

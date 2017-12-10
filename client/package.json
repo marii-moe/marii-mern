@@ -1,11 +1,19 @@
 {
   "name": "client",
   "version": "0.1.0",
-  "private": true,
   "dependencies": {
+    "apollo-client-preset": "^1.0.0",
+    "apollo-link-http": "^1.0.0",
+    "apollo-link-ws": "^1.0.0",
+    "graphql": "^0.11.0",
+    "graphql-tag": "^2.0.0",
     "react": "^16.1.1",
+    "react-apollo": "^2.0.0",
     "react-dom": "^16.1.1",
-    "react-scripts": "1.0.17"
+    "react-router": "^4.0.0",
+    "react-router-dom": "^4.0.0",
+    "react-scripts": "1.0.17",
+    "subscriptions-transport-ws": "^0.9.0"
   },
   "scripts": {
     "start": "react-scripts start",
