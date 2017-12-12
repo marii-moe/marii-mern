@@ -35,15 +35,17 @@ function buildFilters({OR = [], description_contains, url_contains}) {
 module.exports = {
   Query: {
     allLinks: async (root, {filter,first,skip}, {mongo: {Links}}) => {
-      let query = filter ? {$or: buildFilters(filter)}: {}
+      const query = filter ? {$or: buildFilters(filter)}: {}
       const cursor = Links.find(query)
       if (first) {
-	cursor.limit(first)
+	cursor.limit(first+1)
       }
       if(skip) {
 	cursor.skip(skip)
       }
-      return cursor.toArray();
+      const links = await cursor.toArray(); 
+      const hasNextPage =  links.length > first
+      return { links: links.slice(0,first), pageInfo: {hasNextPage: hasNextPage}}
     },
   },
   

@@ -30,7 +30,7 @@ class Search extends Component {
       query: ALL_LINKS_SEARCH_QUERY,
       variables: { searchText }
     })
-    const links = results.data.allLinks
+    const links = results.data.allLinks.links
     this.setState({ links })
   }
 }
@@ -44,20 +44,22 @@ const ALL_LINKS_SEARCH_QUERY = gql`
         description_contains: $searchText
       }]
     }) {
-      id
-      url
-      description
-      postedBy {
-        id
-        name
-      }
-      votes {
-        id
-        user {
-          id
-        }
-      }
-    }
+         links {
+           id
+           url
+           description
+           postedBy {
+             id
+             name
+           }
+           votes {
+             id
+             user {
+               id
+             }
+           }
+         }
+       }
   }
 `
 

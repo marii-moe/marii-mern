@@ -38,18 +38,19 @@ class LinkList extends Component {
   }
   _getLinksToRender = (isNewPage) => {
     if (isNewPage) {
-      return this.props.allLinksQuery.allLinks
+      return this.props.allLinksQuery.allLinks.links
     }
-    const rankedLinks = this.props.allLinksQuery.allLinks.slice()
-    rankedLinks.sort((l1, l2) => l2.votes.lengt - l1.votes.length)
+    const rankedLinks = this.props.allLinksQuery.allLinks.links.slice()
+    rankedLinks.sort((l1, l2) => l2.votes.length - l1.votes.length)
     return rankedLinks
   }
 
   _nextPage = () => {
-    console.log('tet')
     const page = parseInt(this.props.match.params.page, 10)
-    const nextPage = page +1
-    this.props.history.push(`/new/${nextPage}`)
+    if(this.props.allLinksQuery.allLinks.pageInfo.hasNextPage) {
+      const nextPage = page +1
+      this.props.history.push(`/new/${nextPage}`)
+    }
   }
 
   _previousPage = () => {
@@ -66,7 +67,7 @@ class LinkList extends Component {
     const skip = isNewPage ? (page -1)* LINKS_PER_PAGE : 0
     const first = isNewPage ? LINKS_PER_PAGE : 100
     const data = store.readQuery({ query: ALL_LINKS_QUERY, variables: { first, skip } })
-    const votedLink = data.allLinks.find(link => link.id === linkId)
+    const votedLink = data.allLinks.links.find(link => link.id === linkId)
     votedLink.votes = createVote.link.votes
     store.writeQuery({ query: ALL_LINKS_QUERY, data })
   }
@@ -96,10 +97,13 @@ class LinkList extends Component {
         }
       `,
       updateQuery: (previous, { subscriptionData }) => {
-	const newAllLinks = [
+	const newlinks = [
 	  subscriptionData.data.Link.node,
-	  ...previous.allLinks
+	  ...previous.allLinks.links
 	]
+	console.log(previous)
+	const newAllLinks = Object.assign({},previous.allLinks,{allLinks: {links: newlinks}})
+	console.log(newAllLinks)
 	const result = {
 	  ...previous,
 	  allLinks: newAllLinks
@@ -140,11 +144,13 @@ class LinkList extends Component {
         }
       `,
       updateQuery: (previous, { subscriptionData }) => {
-	const votedLinkIndex = previous.allLinks.findIndex(
+	const votedLinkIndex = previous.allLinks.links.findIndex(
 	  link => link.id === subscriptionData.data.Vote.node.link.id)
 	const link = subscriptionData.data.Vote.node.link
-	const newAllLinks = previous.allLinks.slice()
-	newAllLinks[votedLinkIndex] = link
+	const allLinks = previous.allLinks
+	const newLinks = allLinks.links.slice()
+	newLinks[votedLinkIndex] = link
+	const newAllLinks = Object.assign({}, allLinks, {links: newLinks})
 	const result = {
 	  ...previous,
 	  allLinks: newAllLinks
@@ -163,19 +169,24 @@ class LinkList extends Component {
 export const ALL_LINKS_QUERY = gql`
 query AllLinksQuery($first: Int, $skip: Int) {
   allLinks(first: $first, skip: $skip) {
-    id
-#miss    createdAt
-    url
-    description
-    postedBy {
+    links {
       id
-      name
-    }
-    votes {
-      id
-      user { 
+  #miss    createdAt
+      url
+      description
+      postedBy {
         id
+        name
       }
+      votes {
+        id
+        user { 
+          id
+        }
+      }
+    }
+    pageInfo {
+      hasNextPage
     }
   }
 }

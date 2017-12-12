@@ -24,7 +24,16 @@ const typeDefs = `
   }
 
   type Query {
-    allLinks(filter: LinkFilter, skip: Int, first: Int): [Link!]!
+    allLinks(filter: LinkFilter, skip: Int, first: Int): AllLinksPayload!
+  }
+
+  type AllLinksPayload {
+    links: [Link!]!
+    pageInfo: PageInfo!
+  }
+
+  type PageInfo {
+    hasNextPage: Boolean!
   }
 
   type User {

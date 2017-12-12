@@ -55,8 +55,8 @@ class CreateLink extends Component {
 	  query: ALL_LINKS_QUERY,
 	  variables: { first, skip}
 	})
-	data.allLinks.splice(0,0,createLink)
-	data.allLinks.pop()
+	data.allLinks.links.splice(0,0,createLink)
+	data.allLinks.links.pop()
 	store.writeQuery({
 	  query: ALL_LINKS_QUERY,
 	  data,
