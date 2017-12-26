@@ -8,6 +8,12 @@ services:
       - "3000:3000"
     volumes:
       - ./client/src:/var/www/marii-mern/src/
+  client-tests:
+    build:
+      context: client/
+      target: tests
+    volumes:
+      - ./client/src:/var/www/marii-mern/src/
   dev-server:
     build:
       context: server/

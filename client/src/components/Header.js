@@ -24,7 +24,7 @@ class Header extends Component {
 	</div>
 	<div className='flex flex-fixed'>
 	  {userId ?
-	    <div className='ml1 pointer black'
+	    <div id='logout' className='ml1 pointer black'
 		   onClick={() => {
 		     localStorage.removeItem(GC_USER_ID)
 		     localStorage.removeItem(GC_AUTH_TOKEN)

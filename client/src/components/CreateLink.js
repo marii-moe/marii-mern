@@ -4,7 +4,7 @@ import gql from 'graphql-tag'
 import { GC_USER_ID, LINKS_PER_PAGE } from '../constants'
 import { ALL_LINKS_QUERY } from './LinkList'
 
-class CreateLink extends Component {
+class CreateLink  extends Component {
   state = {
     description: '',
     url: '',
@@ -15,16 +15,18 @@ class CreateLink extends Component {
       <div>
 	<div className='flex flex-column mt3'>
 	  <input
+	    name='description'
 	    className='mb2'
 	    value={this.state.description}
-	    onChange={(e) => this.setState({ description: e.target.value })}
+	    onChange={(event) => this.setState({ description: event.target.value })}
 	    type='text'
 	    placeholder='A description for the link'
 	    />
 	    <input
+	      name='url'
 	      className='mb2'
 	      value={this.state.url}
-	      onChange={(e) => this.setState({ url: e.target.value })}
+	      onChange={(event) => this.setState({ url: event.target.value })}
 	      type='text'
 	      placeholder='The URL for the link'
 	      />
@@ -38,35 +40,36 @@ class CreateLink extends Component {
 
   _createLink = async () => {
     const postedById = localStorage.getItem(GC_USER_ID)
-    if(!postedById) {
-      console.error('No user logged in')
-      return
-    }
     const { description, url } = this.state
     await this.props.createLinkMutation({
       variables: {
 	description,
 	url,
       },
-      update: (store, { data: { createLink } }) => {
-	const first = LINKS_PER_PAGE
-	const skip = 0
-	const data = store.readQuery({
-	  query: ALL_LINKS_QUERY,
-	  variables: { first, skip}
-	})
-	data.allLinks.links.splice(0,0,createLink)
-	data.allLinks.links.pop()
-	store.writeQuery({
-	  query: ALL_LINKS_QUERY,
-	  data,
-	  variables: { first, skip, }
-	})
-      },
+      update: this._updateStoreWithLink
     })
     this.props.history.push(`/new/1`)
   }
+
+  _updateStoreWithLink = (store, { data: {createLink } }) => {
+    const first = LINKS_PER_PAGE
+    const skip = 0
+    const data = store.readQuery({
+      query: ALL_LINKS_QUERY,
+      variables: { first, skip}
+    })
+    data.allLinks.links.splice(0,0,createLink)
+    if(data.allLinks.links.length > first)
+      data.allLinks.links.pop()
+    store.writeQuery({
+      query: ALL_LINKS_QUERY,
+      data,
+      variables: { first, skip, }
+    })
+  }
 }
+
+export { CreateLink as _CreateLink }
 
 const CREATE_LINK_MUTATION = gql`
 mutation CreateLinkMutation($description: String!, $url: String!) {
