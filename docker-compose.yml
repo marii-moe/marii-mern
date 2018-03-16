@@ -17,8 +17,16 @@ services:
   dev-server:
     build:
       context: server/
+      target: dev-server
     ports:
       - "3001:3000"
+  server-tests:
+    build:
+      context: server/
+      target: tests
+    volumes:
+      - ./server/src:/var/www/marii-mern/src/
+
   mongo:
     image: mongo:latest
     expose:

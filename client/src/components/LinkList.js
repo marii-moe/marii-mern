@@ -61,16 +61,17 @@ class LinkList extends Component {
     }
   }
   
-  _updateCacheAfterVote = (store, createVote, linkId) => {
+  _updateCacheAfterVote = (store, { data: { createVote } }) => {
     const isNewPage = this.props.location.pathname.includes('new')
     const page = parseInt(this.props.match.params.page, 10)
     const skip = isNewPage ? (page -1)* LINKS_PER_PAGE : 0
     const first = isNewPage ? LINKS_PER_PAGE : 100
     const data = store.readQuery({ query: ALL_LINKS_QUERY, variables: { first, skip } })
-    const votedLink = data.allLinks.links.find(link => link.id === linkId)
+    const votedLink = data.allLinks.links.find(link => link.id === createVote.link.id)
     votedLink.votes = createVote.link.votes
     store.writeQuery({ query: ALL_LINKS_QUERY, data })
   }
+  
   _subscribeToNewLinks = () => {
     this.props.allLinksQuery.subscribeToMore({
       document: gql`
@@ -101,9 +102,7 @@ class LinkList extends Component {
 	  subscriptionData.data.Link.node,
 	  ...previous.allLinks.links
 	]
-	console.log(previous)
 	const newAllLinks = Object.assign({},previous.allLinks,{allLinks: {links: newlinks}})
-	console.log(newAllLinks)
 	const result = {
 	  ...previous,
 	  allLinks: newAllLinks
@@ -112,6 +111,22 @@ class LinkList extends Component {
       }
     })
   }
+
+  _updateVotes=(previous, { subscriptionData }) => {
+    const votedLinkIndex = previous.allLinks.links.findIndex(
+      link => link.id === subscriptionData.data.Vote.node.link.id)
+    const link = subscriptionData.data.Vote.node.link
+    const allLinks = previous.allLinks
+    const newLinks = allLinks.links.slice()
+    newLinks[votedLinkIndex] = link
+    const newAllLinks = Object.assign({}, allLinks, {links: newLinks})
+    const result = {
+      ...previous,
+      allLinks: newAllLinks
+    }
+    return result
+  }
+  
   _subscribeToNewVotes = () => {
     this.props.allLinksQuery.subscribeToMore({
       document: gql `
@@ -143,22 +158,10 @@ class LinkList extends Component {
           }
         }
       `,
-      updateQuery: (previous, { subscriptionData }) => {
-	const votedLinkIndex = previous.allLinks.links.findIndex(
-	  link => link.id === subscriptionData.data.Vote.node.link.id)
-	const link = subscriptionData.data.Vote.node.link
-	const allLinks = previous.allLinks
-	const newLinks = allLinks.links.slice()
-	newLinks[votedLinkIndex] = link
-	const newAllLinks = Object.assign({}, allLinks, {links: newLinks})
-	const result = {
-	  ...previous,
-	  allLinks: newAllLinks
-	}
-	return result
-      },
+      updateQuery: this._updateVotes
     })
   }
+  
   componentDidMount() {
     this._subscribeToNewLinks()
     this._subscribeToNewVotes()
@@ -191,6 +194,8 @@ query AllLinksQuery($first: Int, $skip: Int) {
   }
 }
 `
+
+export {LinkList as _LinkList}
 
 export default graphql(ALL_LINKS_QUERY, {
   name: 'allLinksQuery',

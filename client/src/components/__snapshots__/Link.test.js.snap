@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render 1`] = `
+<div
+  className="flex mt2 items-start"
+>
+  <div
+    className="flex items-center"
+  >
+    <span
+      className="gray"
+    >
+      NaN
+      .
+    </span>
+  </div>
+  <div
+    className="ml1"
+  >
+    <div>
+      test description
+       (
+      http://test.com
+      )
+    </div>
+    <div
+      className="f6 lh-copy gray"
+    >
+      0
+       votes | by 
+      test-user
+       
+      NaN years ago
+    </div>
+  </div>
+</div>
+`;

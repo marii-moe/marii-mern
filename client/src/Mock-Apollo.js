@@ -43,6 +43,7 @@ export const mockClient = new ApolloClient({
 export const apolloRender = (element) => {
   const wrapper = shallow(<ApolloProvider client={mockClient}>{element}</ApolloProvider>                                                                                                     
                           , { context: { client: mockClient }})                                                                                                                                  
-        .dive().dive().dive()
-  return wrapper
+  const renderedElement = wrapper.dive().dive().dive()
+  renderedElement.root=wrapper
+  return renderedElement
 }
